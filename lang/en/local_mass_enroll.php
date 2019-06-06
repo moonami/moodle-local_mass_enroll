@@ -102,6 +102,7 @@ $string['im:opening_file'] = 'Opening file : {$a} ';
 $string['im:user_unknown'] = '{$a} unknown - skipping line';
 $string['im:already_in'] = '{$a} already enroled ';
 $string['im:enrolled_ok'] = '{$a} enroled ';
+$string['im:enrolled_ok_role'] = '{$a->user} enroled with role {$a->role}';
 $string['im:error_in'] = 'error enroling {$a}';
 $string['im:not_in'] = '{$a} NOT enroled ';
 $string['im:unenrolled_ok'] = '{$a} unenroled ';
@@ -274,3 +275,6 @@ $string['enablemassunenrol_help'] = 'Check this option to allow extension for ma
 $string['localmassenrollextensions'] = 'Menu extension settings';
 $string['mailreportdefault'] = 'Send reports default';
 $string['mailreportdefault_help'] = 'Configure the default setting for sending reports for the bulk (un)enrolment forms';
+$string['roleincsv'] = 'Custom user role';
+$string['roleincsv_help'] = 'If a row in CSV file has third column that constitutes valid role shortname it shall be
+ used for user enrollment in course.';

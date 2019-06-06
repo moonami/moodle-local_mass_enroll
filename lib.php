@@ -95,6 +95,8 @@ function mass_enroll($cir, $course, $context, $data) {
     $result = '';
     $roleid = $data->roleassign;
     $useridfield = $data->firstcolumn;
+    $validroles = get_assignable_roles($context);
+    $validrolesshort = get_assignable_roles($context, ROLENAME_SHORT);
 
     $enrollablecount = 0;
     $createdgroupscount = 0;
@@ -102,9 +104,7 @@ function mass_enroll($cir, $course, $context, $data) {
     $createdgroups = '';
     $createdgroupings = '';
 
-    $role = $DB->get_record('role', array('id' => $roleid));
-
-    $result .= get_string('im:using_role', 'local_mass_enroll', $role->name) . "\n";
+    $result .= get_string('im:using_role', 'local_mass_enroll', $validroles[$roleid]) . "\n";
 
     $plugin = enrol_get_plugin('manual');
     // Moodle 2.x enrolment and role assignment are different.
@@ -128,7 +128,7 @@ function mass_enroll($cir, $course, $context, $data) {
 
         // First column = id Moodle (idnumber,username or email).
         // Get rid on eventual double quotes unfortunately not done by Moodle CSV importer.
-        $fields[0] = str_replace('"', '', trim($fields[0]));
+        $fields[0] = trim($fields[0], " \t\n\r\0\x0B\"");
 
         if (!$user = $DB->get_record('user', array($useridfield => $fields[0]))) {
             $result .= get_string('im:user_unknown', 'local_mass_enroll', $fields[0]) . "\n";
@@ -148,17 +148,33 @@ function mass_enroll($cir, $course, $context, $data) {
             } else {
                 $timeend = 0;
             }
+            $enrolrole = $roleid;
+            $customrole = false;
+            if (!empty($data->roleincsv) and !empty($fields[2])) {
+                $fieldvalue = trim($fields[2], " \t\n\r\0\x0B\"");
+                $csvrole = array_search($fieldvalue, $validrolesshort, true);
+                if ($csvrole) {
+                    $enrolrole = $csvrole;
+                    $customrole = true;
+                }
+            }
             // Enrol the user with this plugin instance (unfortunately return void, no more status).
-            $plugin->enrol_user($instance, $user->id, $roleid, $timestart, $timeend);
-            $result .= get_string('im:enrolled_ok', 'local_mass_enroll', fullname($user));
+            $plugin->enrol_user($instance, $user->id, $enrolrole, $timestart, $timeend);
+            if ($customrole) {
+                $result .= get_string(
+                    'im:enrolled_ok_role', 'local_mass_enroll',
+                    (object)['user' => fullname($user), 'role' => $validroles[$enrolrole]]
+                );
+            } else {
+                $result .= get_string('im:enrolled_ok', 'local_mass_enroll', fullname($user));
+            }
             $enrollablecount++;
         }
 
         if (empty($fields[1])) {
             $group = null;
-        }
-        else {
-            $group = str_replace('"', '', trim($fields[1]));
+        } else {
+            $group = trim($fields[1], " \t\n\r\0\x0B\"");
         }
         // 2nd column?
         if (empty($group)) {

@@ -78,6 +78,14 @@ class mass_enroll_form extends moodleform {
         $studentrole = $DB->get_record('role', array('archetype' => 'student'));
         $mform->setDefault('roleassign', $studentrole->id);
 
+        /** @var MoodleQuickForm_advcheckbox $roleincsv */
+        $roleincsv = $mform->addElement(
+            'advcheckbox', 'roleincsv', get_string('roleincsv', 'local_mass_enroll'), '', null, [false, true]
+        );
+        $mform->setType($roleincsv->getName(), PARAM_BOOL);
+        $mform->setDefault($roleincsv->getName(), true);
+        $mform->addHelpButton($roleincsv->getName(), 'roleincsv', 'local_mass_enroll');
+
         $ids = array(
             'idnumber' => get_string('idnumber', 'local_mass_enroll'),
             'username' => get_string('username', 'local_mass_enroll'),
